@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#1D5C4D">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<title>Layar Informasi LAKAS CAIR - BPKAD Kab. HSU</title>
+<style>
+  html,body{margin:0;height:100%;background:#EEF3F0;overflow:hidden}
+  iframe{border:0;width:100%;height:100%;display:block}
+  #tutup{position:fixed;inset:0;z-index:5;cursor:pointer;background:transparent}
+  #pesan{position:fixed;left:50%;bottom:3vh;transform:translateX(-50%);z-index:6;pointer-events:none;
+    background:rgba(29,92,77,.92);color:#fff;font:600 max(16px,1.4vw)/1.3 Arial,sans-serif;
+    padding:1.2vh 2vw;border-radius:999px;box-shadow:0 4px 16px rgba(0,0,0,.25);transition:opacity .6s}
+  .sembunyi{display:none}
+</style>
+</head>
+<body>
+<iframe id="f" title="Layar Informasi LAKAS CAIR" allow="clipboard-write; fullscreen" src="https://script.google.com/macros/s/AKfycbzdya4uNM1fF3fuUkBlxuAFVOqe4ADlu0VUTSeF9OgrZmu0QuJY8NTuNDsr9DV6Ds8mlg/exec?halaman=tv"></iframe>
+<div id="tutup" title="Klik untuk layar penuh"></div>
+<div id="pesan">Tekan OK di remote / klik layar untuk layar penuh</div>
+<noscript>Aktifkan JavaScript untuk memakai halaman ini.</noscript>
+<script>
+  // Browser tidak mengizinkan layar penuh otomatis: perlu satu tekan (OK remote, Enter, atau klik).
+  var de = document.documentElement, tutup = document.getElementById('tutup'), pesan = document.getElementById('pesan');
+  function sedangPenuh(){ return !!(document.fullscreenElement || document.webkitFullscreenElement); }
+  function penuh(){
+    if (sedangPenuh()) return;
+    var f = de.requestFullscreen || de.webkitRequestFullscreen;
+    if (f) { try { var p = f.call(de); if (p && p.catch) p.catch(function(){}); } catch (e) {} }
+  }
+  function atur(){
+    var p = sedangPenuh();
+    tutup.classList.toggle('sembunyi', p);
+    pesan.classList.toggle('sembunyi', p);
+    if (!p) { pesan.style.opacity = 1; clearTimeout(atur.t); atur.t = setTimeout(function(){ pesan.style.opacity = 0; }, 20000); }
+  }
+  tutup.addEventListener('click', penuh);
+  document.addEventListener('keydown', function(e){
+    if (e.key === 'Enter' || e.key === ' ' || e.keyCode === 13 || e.keyCode === 23) penuh();
+  });
+  document.addEventListener('fullscreenchange', atur);
+  document.addEventListener('webkitfullscreenchange', atur);
+  atur();
+  window.focus();
+  // Penjaga: kalau 5 menit tidak ada data masuk (internet sempat mati saat TV dinyalakan, atau Google error),
+  // hanya bingkai isi yang dimuat ulang. Layar penuh tetap terjaga.
+  var f = document.getElementById('f'), SUMBER = f.src, terakhir = Date.now();
+  window.addEventListener('message', function(ev){ if (ev.data && ev.data.lakasTv === 'ok') terakhir = Date.now(); });
+  setInterval(function(){
+    if (Date.now() - terakhir > 5 * 60 * 1000 && navigator.onLine !== false) { terakhir = Date.now(); f.src = SUMBER; }
+  }, 30000);
+</script>
+</body>
+</html>
