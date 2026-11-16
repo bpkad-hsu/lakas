@@ -47,8 +47,13 @@
   window.focus();
   // Penjaga: kalau 5 menit tidak ada data masuk (internet sempat mati saat TV dinyalakan, atau Google error),
   // hanya bingkai isi yang dimuat ulang. Layar penuh tetap terjaga.
-  var f = document.getElementById('f'), SUMBER = f.src, terakhir = Date.now();
-  window.addEventListener('message', function(ev){ if (ev.data && ev.data.lakasTv === 'ok') terakhir = Date.now(); });
+  var f = document.getElementById('f'), SUMBER = f.src, terakhir = Date.now(), muatBaru = false;
+  window.addEventListener('message', function(ev){
+    if (!ev.data) return;
+    if (ev.data.lakasTv === 'ok') terakhir = Date.now();
+    // Tampilan baru tersedia: muat ulang bingkai isi sekali (layar penuh tetap)
+    if (ev.data.lakasTv === 'baru' && !muatBaru) { muatBaru = true; terakhir = Date.now(); f.src = SUMBER; setTimeout(function(){ muatBaru = false; }, 10 * 60 * 1000); }
+  });
   setInterval(function(){
     if (Date.now() - terakhir > 5 * 60 * 1000 && navigator.onLine !== false) { terakhir = Date.now(); f.src = SUMBER; }
   }, 30000);
